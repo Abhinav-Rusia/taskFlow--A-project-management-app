@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import Avatar from "../components/common/Avatar";
 import {
   PlusIcon,
   ChartBarIcon,
@@ -187,19 +188,21 @@ const Dashboard = () => {
                 TaskFlow
               </span>
             </div>
+
             <div className="flex items-center space-x-4">
-              <div className="text-right">
+              <div className="hidden md:block text-right">
                 <p className="text-sm font-semibold text-slate-800">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-slate-500">{user?.email}</p>
               </div>
-              <button
-                onClick={logout}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors"
-              >
-                Sign out
-              </button>
+
+              {/* ✅ Avatar with Dropdown Menu */}
+              <Avatar
+                user={user}
+                size="md"
+                showDropdown={true}
+                className="ml-3"
+              />
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ import VerifyOTP from "./pages/VerifyOTP";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import Tasks from "./pages/Tasks";
+import Profile from "./pages/Profile";        
 
 // Components
 import Spinner from "./components/common/Spinner";
@@ -78,6 +79,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+         
 
           {/* Default redirects */}
           <Route path="/" element={<Navigate to="/login" replace />} />

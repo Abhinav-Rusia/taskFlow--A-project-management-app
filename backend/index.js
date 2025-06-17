@@ -4,6 +4,7 @@ import connectDB from "./config/connectDB.js";
 import authRouter from "./routes/authRoute.js";
 import projectRoutes from "./routes/projectRoute.js";
 import taskRoutes from "./routes/taskRoute.js";
+import profileRoutes from "./routes/profileRoutes.js"
 import cors from "cors";
 
 dotenv.config();
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use('/api/profile', profileRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
