@@ -14,7 +14,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
-  const { isAuthenticated,register, loading, error, clearError } = useAuth();
+  const { isAuthenticated, register, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -86,28 +86,23 @@ const Register = () => {
   // };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-     
-  if (!validateForm()) {
-    return;
-  }
+    e.preventDefault();
 
-  const userData = {
-    username: formData.name.trim(),
-    email: formData.email,
-    password: formData.password
+    if (!validateForm()) {
+      return;
+    }
+
+    const userData = {
+      username: formData.name.trim(),
+      email: formData.email,
+      password: formData.password,
+    };
+    const result = await register(userData);
+
+    if (result.success) {
+      navigate("/verify-otp", { state: { email: formData.email } });
+    }
   };
-
-  console.log('🚀 Before registration - Auth state:', { isAuthenticated, loading });
-  const result = await register(userData);
-  console.log('📝 After registration - Result:', result);
-  console.log('🔐 After registration - Auth state:', { isAuthenticated, loading });
-     
-  if (result.success) {
-    console.log('✅ Navigating to verify-otp with email:', formData.email);
-    navigate('/verify-otp', { state: { email: formData.email } });
-  }
-};
 
   const handleNavigateToLogin = () => {
     navigate("/login");
