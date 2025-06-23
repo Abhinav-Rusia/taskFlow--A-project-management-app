@@ -201,13 +201,73 @@ export const taskValidation = Joi.object({
         })
 });
 
+// ✅ NEW - Comment Validation (converted to Joi)
+export const commentValidation = Joi.object({
+    content: Joi.string()
+        .min(1)
+        .max(1000)
+        .required()
+        .messages({
+            'string.min': 'Comment content is required',
+            'string.max': 'Comment cannot exceed 1000 characters',
+            'any.required': 'Comment content is required'
+        }),
+    
+    taskId: Joi.string()
+        .pattern(/^[0-9a-fA-F]{24}$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Invalid task ID format',
+            'any.required': 'Task ID is required'
+        })
+});
+
+// ✅ NEW - Comment Update Validation (converted to Joi)
+export const commentUpdateValidation = Joi.object({
+    content: Joi.string()
+        .min(1)
+        .max(1000)
+        .required()
+        .messages({
+            'string.min': 'Comment content is required',
+            'string.max': 'Comment cannot exceed 1000 characters',
+            'any.required': 'Comment content is required'
+        })
+});
+
+// ✅ NEW - Team Invitation Validation (converted to Joi)
+export const invitationValidation = Joi.object({
+    email: Joi.string()
+        .email()
+        .required()
+        .messages({
+            'string.email': 'Valid email is required',
+            'any.required': 'Email is required'
+        }),
+    
+    projectId: Joi.string()
+        .pattern(/^[0-9a-fA-F]{24}$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Invalid project ID format',
+            'any.required': 'Project ID is required'
+        }),
+    
+    message: Joi.string()
+        .max(500)
+        .optional()
+        .messages({
+            'string.max': 'Message cannot exceed 500 characters'
+        })
+});
+
 // Update validations (allow partial updates)
 export const projectUpdateValidation = projectValidation.fork(
-    ['title'], 
+    ['title'],
     (schema) => schema.optional()
 );
 
 export const taskUpdateValidation = taskValidation.fork(
-    ['title', 'project'], 
+    ['title', 'project'],
     (schema) => schema.optional()
 );

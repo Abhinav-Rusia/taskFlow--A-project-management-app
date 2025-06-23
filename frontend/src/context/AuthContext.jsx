@@ -88,7 +88,6 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: "AUTH_CHECK_COMPLETE" });
       }
     };
-
     checkAuthStatus();
   }, []);
 
@@ -110,12 +109,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Helper method to get auth headers
+  const getAuthHeaders = useCallback(() => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, []);
+
+  // Helper method to check if user has specific role in a project
+  const hasProjectRole = useCallback((projectId, requiredRole = null) => {
+    if (!state.user || !projectId) return false;
+    
+    // If user is admin, they have access to everything
+    if (state.user.role === 'admin') return true;
+    
+    // Check if user is member of the project
+    const membership = state.user.projects?.find(p => p.project === projectId);
+    if (!membership) return false;
+    
+    // If no specific role required, just being a member is enough
+    if (!requiredRole) return true;
+    
+    // Check specific role
+    const roleHierarchy = { 'member': 1, 'admin': 2, 'owner': 3 };
+    return roleHierarchy[membership.role] >= roleHierarchy[requiredRole];
+  }, [state.user]);
+
+  // Helper method to get user's role in a project
+  const getUserProjectRole = useCallback((projectId) => {
+    if (!state.user || !projectId) return null;
+    
+    if (state.user.role === 'admin') return 'admin';
+    
+    const membership = state.user.projects?.find(p => p.project === projectId);
+    return membership?.role || null;
+  }, [state.user]);
+
   // Login handler
   const login = async (email, password) => {
     dispatch({ type: "LOGIN_START" });
     try {
       const response = await axios.post("/auth/login", { email, password });
-
       if (response.data.success) {
         const { token, user } = response.data;
         localStorage.setItem("token", token);
@@ -135,33 +168,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-   // Register handler
-const register = async (userData) => {
-  dispatch({ type: 'SET_LOADING', payload: true }); 
-  try {
-    const response = await axios.post('/auth/register', userData);
-    if (response.data.success) {
-      toast.success('Registration successful! Please check your email for OTP.');
-      dispatch({ type: 'REGISTER_SUCCESS' }); 
-      return { success: true, message: response.data.message };
-    } else {
-      throw new Error(response.data.message || 'Registration failed');
+  // Register handler
+  const register = async (userData) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      const response = await axios.post('/auth/register', userData);
+      if (response.data.success) {
+        toast.success('Registration successful! Please check your email for OTP.');
+        dispatch({ type: 'REGISTER_SUCCESS' });
+        return { success: true, message: response.data.message };
+      } else {
+        throw new Error(response.data.message || 'Registration failed');
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || error.message || 'Registration failed';
+      dispatch({ type: 'LOGIN_FAILURE', payload: message });
+      toast.error(message);
+      return { success: false, message };
     }
-  } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Registration failed';
-    dispatch({ type: 'LOGIN_FAILURE', payload: message });
-    toast.error(message);
-    return { success: false, message };
-  }
-};
-
+  };
 
   // Verify OTP
   const verifyOTP = async (email, otp) => {
     dispatch({ type: "LOGIN_START" });
     try {
       const response = await axios.post("/auth/verify-otp", { email, otp });
-
       if (response.data.success) {
         toast.success("Email verified successfully! You can now login.");
         dispatch({ type: "CLEAR_ERROR" });
@@ -194,6 +225,27 @@ const register = async (userData) => {
     dispatch({ type: "CLEAR_ERROR" });
   }, []);
 
+  // Refresh user data (useful after project changes)
+  const refreshUser = useCallback(async () => {
+    if (state.isAuthenticated) {
+      try {
+        await getCurrentUser();
+      } catch (error) {
+        console.error("Failed to refresh user data:", error);
+      }
+    }
+  }, [state.isAuthenticated]);
+
+  // Check if current user can manage a specific project
+  const canManageProject = useCallback((projectId) => {
+    return hasProjectRole(projectId, 'admin');
+  }, [hasProjectRole]);
+
+  // Check if current user can assign tasks in a project
+  const canAssignTasks = useCallback((projectId) => {
+    return hasProjectRole(projectId, 'admin');
+  }, [hasProjectRole]);
+
   // Provide values
   const value = {
     ...state,
@@ -202,6 +254,12 @@ const register = async (userData) => {
     verifyOTP,
     logout,
     clearError,
+    refreshUser,
+    getAuthHeaders,
+    hasProjectRole,
+    getUserProjectRole,
+    canManageProject,
+    canAssignTasks,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

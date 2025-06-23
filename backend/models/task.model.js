@@ -20,6 +20,11 @@ const taskSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
     status: {
         type: String,
         enum: ["todo", "in-progress", "completed"],
@@ -30,10 +35,20 @@ const taskSchema = new mongoose.Schema({
         enum: ["low", "medium", "high"],
         default: "low"
     },
-    dueDate : {
+    dueDate: {
         type: Date,
         required: true
     },
+    comments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment"
+    }],
+    tags: [{
+        type: String,
+        trim: true
+    }]
+
+
 }, { timestamps: true });
 
 const Task = mongoose.model("Task", taskSchema);

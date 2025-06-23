@@ -5,6 +5,8 @@ import authRouter from "./routes/authRoute.js";
 import projectRoutes from "./routes/projectRoute.js";
 import taskRoutes from "./routes/taskRoute.js";
 import profileRoutes from "./routes/profileRoutes.js"
+import teamRoutes from "./routes/teamRoute.js"
+import commentRoutes from "./routes/commentRoute.js"
 import cors from "cors";
 
 dotenv.config();
@@ -22,6 +24,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/team',teamRoutes)
+app.use('/api/comments',commentRoutes)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

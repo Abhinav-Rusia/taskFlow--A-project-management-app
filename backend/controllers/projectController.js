@@ -50,6 +50,7 @@ export const getAllProjects = async (req, res) => {
 };
 
 // Get single project
+// Get single project
 export const getProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
@@ -61,9 +62,14 @@ export const getProject = async (req, res) => {
     }
 
     const userId = req.user.id;
-
-    if (project.owner.toString() !== userId && !project.teamMembers.some(member => member._id.toString() === userId)) {
-      return res.status(403).json({ success: false, message: "You are not authorized to view this project" });
+    
+    
+    if (project.owner._id.toString() !== userId && 
+        !project.teamMembers.some(member => member._id.toString() === userId)) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "You are not authorized to view this project" 
+      });
     }
 
     res.status(200).json({
@@ -82,11 +88,12 @@ export const updateProject = async (req, res) => {
   try {
     const { title, description, teamMembers, status, priority, startDate, dueDate } = req.body;
     const project = await Project.findById(req.params.id);
-
+    
     if (!project) {
       return res.status(404).json({ success: false, message: "Project not found" });
     }
 
+    // ✅ FIXED: Use project.owner (not populated) for comparison
     if (project.owner.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "You are not authorized to update this project" });
     }
@@ -108,21 +115,22 @@ export const updateProject = async (req, res) => {
   }
 };
 
-// Delete project
+// Delete project  
 export const deleteProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
-
+    
     if (!project) {
       return res.status(404).json({ success: false, message: "Project not found" });
     }
 
+    // ✅ FIXED: Use project.owner (not populated) for comparison
     if (project.owner.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: "You are not authorized to delete this project" });
     }
 
     await Project.findByIdAndDelete(req.params.id);
-
+    
     res.status(200).json({
       success: true,
       message: "Project deleted successfully"
@@ -130,5 +138,52 @@ export const deleteProject = async (req, res) => {
   } catch (error) {
     console.error("Delete project error:", error);
     res.status(500).json({ success: false, message: "Failed to delete project" });
+  }
+};
+
+
+// Get project members for assignment dropdown
+export const getProjectMembers = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      return res.status(400).json({ success: false, message: "Project ID is required" });
+    }
+
+    const project = await Project.findById(projectId)
+      .populate('owner', 'username email')
+      .populate('teamMembers', 'username email');
+
+    if (!project) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    // Check if user has access to this project
+    const hasAccess =
+      project.owner._id.toString() === req.user.id ||
+      project.teamMembers.some(member => member._id.toString() === req.user.id);
+
+    if (!hasAccess) {
+      return res.status(403).json({ success: false, message: "Unauthorized to view project members" });
+    }
+
+    // Combine owner and members
+    const allMembers = [
+      { ...project.owner.toObject(), role: 'Owner' },
+      ...project.teamMembers.map(member => ({ ...member.toObject(), role: 'Member' }))
+    ];
+
+    res.json({
+      success: true,
+      members: allMembers
+    });
+  } catch (error) {
+    console.error('Get project members error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch project members',
+      error: error.message
+    });
   }
 };

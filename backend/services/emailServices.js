@@ -148,3 +148,93 @@ export const sendWelcomeEmail = async (email, username) => {
     return { success: false, error: error.message };
   }
 };
+
+// ✅ Send team invitation email
+export const sendInvitationEmail = async (inviteeEmail, invitationToken, projectTitle, inviterName) => {
+  try {
+    console.log(`👥 Sending invitation email to: ${inviteeEmail}`);
+    
+    const transporter = createTransporter();
+    
+    const acceptUrl = `${process.env.FRONTEND_URL}/accept-invitation/${invitationToken}`;
+    
+    const mailOptions = {
+      from: {
+        name: 'TaskFlow App',
+        address: process.env.EMAIL_USER
+      },
+      to: inviteeEmail,
+      subject: `You're invited to join "${projectTitle}" on TaskFlow! 🎯`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
+          <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #4F46E5; margin: 0;">TaskFlow</h1>
+              <p style="color: #666; margin: 5px 0;">Project & Task Management</p>
+            </div>
+            
+            <div style="background-color: #EEF2FF; border-left: 4px solid #4F46E5; padding: 20px; margin-bottom: 25px; border-radius: 0 8px 8px 0;">
+              <h2 style="color: #4F46E5; margin: 0 0 10px 0; font-size: 20px;">🎯 Project Invitation</h2>
+              <p style="color: #4338CA; margin: 0; font-weight: 500;">You've been invited to collaborate!</p>
+            </div>
+            
+            <p style="color: #333; font-size: 16px; margin-bottom: 20px;">
+              <strong>${inviterName}</strong> has invited you to join the project:
+            </p>
+            
+            <div style="background-color: #F8FAFC; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #E2E8F0;">
+              <h3 style="color: #1E293B; margin: 0; font-size: 18px;">📁 ${projectTitle}</h3>
+            </div>
+            
+            <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
+              By accepting this invitation, you'll be able to:
+            </p>
+            
+            <ul style="color: #666; line-height: 1.8; margin-bottom: 30px; padding-left: 20px;">
+              <li>✅ View and manage project tasks</li>
+              <li>💬 Collaborate with team members</li>
+              <li>📊 Track project progress</li>
+              <li>🔔 Receive project updates</li>
+            </ul>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${acceptUrl}" style="background-color: #10B981; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                🚀 Accept Invitation
+              </a>
+            </div>
+            
+            <div style="background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 15px; border-radius: 8px; margin: 25px 0;">
+              <p style="color: #92400E; margin: 0; font-size: 14px;">
+                ⏰ <strong>Note:</strong> This invitation will expire in 7 days. If you don't have a TaskFlow account, you'll be prompted to create one.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+              <p style="color: #666; font-size: 14px; margin: 0;">
+                Can't click the button? Copy and paste this link:
+              </p>
+              <p style="color: #4F46E5; font-size: 12px; word-break: break-all; margin: 5px 0;">
+                ${acceptUrl}
+              </p>
+            </div>
+            
+            <div style="border-top: 1px solid #E5E7EB; padding-top: 20px; margin-top: 30px;">
+              <p style="color: #999; font-size: 12px; text-align: center; margin: 0;">
+                If you weren't expecting this invitation, you can safely ignore this email.
+              </p>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Invitation email sent successfully:', result.messageId);
+    return { success: true, messageId: result.messageId };
+    
+  } catch (error) {
+    console.error('❌ Invitation email sending failed:', error);
+    return { success: false, error: error.message };
+  }
+};
+

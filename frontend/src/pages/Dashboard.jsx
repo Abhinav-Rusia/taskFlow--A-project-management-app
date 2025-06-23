@@ -29,51 +29,14 @@ const Dashboard = () => {
   const [recentTasks, setRecentTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // const fetchDashboardData = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const [projectsResponse, tasksResponse] = await Promise.all([
-  //       axios.get('/projects'),
-  //       axios.get('/tasks/my-tasks')
-  //     ]);
-
-  //     if (projectsResponse.data.success) {
-  //       const projects = projectsResponse.data.projects || projectsResponse.data.data || [];
-  //       setRecentProjects(projects.slice(0, 3));
-  //       const totalProjects = projects.length;
-  //       setStats(prev => ({ ...prev, totalProjects }));
-  //     }
-
-  //     if (tasksResponse.data.success) {
-  //       const tasks = tasksResponse.data.tasks || tasksResponse.data.data || [];
-  //       setRecentTasks(tasks.slice(0, 3));
-  //       const activeTasks = tasks.filter(task => task.status === 'todo' || task.status === 'in-progress').length;
-  //       const completedTasks = tasks.filter(task => task.status === 'completed').length;
-  //       const overdueTasks = tasks.filter(task =>
-  //         new Date(task.dueDate) < new Date() && task.status !== 'completed'
-  //       ).length;
-  //       setStats(prev => ({
-  //         ...prev,
-  //         activeTasks,
-  //         completedTasks,
-  //         overdueTasks
-  //       }));
-  //     }
-  //   } catch (error) {
-  //     console.error('Dashboard data fetch error:', error);
-  //     toast.error('Failed to load dashboard data');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
+ 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
 
       const [projectsResponse, tasksResponse] = await Promise.all([
         axios.get("/projects"),
-        axios.get("/tasks/my-tasks"),
+        axios.get("/tasks/my"),
       ]);
 
       // Process projects data
@@ -259,11 +222,6 @@ const Dashboard = () => {
             to="/tasks"
             label="New Task"
             icon={<PlusIcon className="w-5 h-5 mr-2" />}
-          />
-          <QuickLink
-            to="/analytics"
-            label="View Analytics"
-            icon={<ChartBarIcon className="w-5 h-5 mr-2" />}
           />
         </div>
 

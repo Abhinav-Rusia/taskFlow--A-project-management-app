@@ -1,26 +1,30 @@
-import express from "express";
+import express from 'express';
+import authMiddleware from '../middleware/auth.js'; // Import default export
 import {
-    createTask,
-    getAllTasks,
-    getTask,
-    updateTask,
-    deleteTask,
-    getMyTasks
-} from "../controllers/taskController.js";
-import authMiddleware from "../middleware/auth.js";
-import { validate,taskValidation,taskUpdateValidation } from "../middleware/validation.js";
+  createTask,
+  getAllTasks,
+  getTasksByProject,
+  getTask,
+  updateTask,
+  deleteTask,
+  getMyTasks,
+  getAssignedTasks,
+  getCreatedTasks,
+} from '../controllers/taskController.js';
 
 const router = express.Router();
 
-// All task routes require authentication
-router.use(authMiddleware);
+// Task CRUD routes - use authMiddleware instead of protect
+router.post('/', authMiddleware, createTask);
+router.get('/', authMiddleware, getAllTasks);
+router.get('/my', authMiddleware, getMyTasks);
+router.get('/assigned', authMiddleware, getAssignedTasks);
+router.get('/created', authMiddleware, getCreatedTasks);
+router.get('/project/:projectId', authMiddleware, getTasksByProject);
+router.get('/:id', authMiddleware, getTask);
+router.put('/:id', authMiddleware, updateTask);
+router.delete('/:id', authMiddleware, deleteTask);
 
-// Task CRUD routes
-router.post("/",validate(taskValidation),createTask);
-router.get("/project/:projectId", getAllTasks);
-router.get("/my-tasks", getMyTasks);
-router.get("/:id", getTask);
-router.put("/:id", validate(taskUpdateValidation),updateTask);
-router.delete("/:id", deleteTask);
+
 
 export default router;
